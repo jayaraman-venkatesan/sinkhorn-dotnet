@@ -1,0 +1,686 @@
+{
+  "provenance": {
+    "pythonVersion": "3.12.3",
+    "potVersion": "0.9.6.post1",
+    "numpyVersion": "2.2.6",
+    "scipyVersion": "1.15.3",
+    "potCommit": "85113e9a380f5fcf684c50c73c1ff6a164a7366e",
+    "sourceGitBlob": "cf5efadfc0f33300899d9b8a20f762e5f96a2759",
+    "sourceSha256": "671958232afa87b8908d183c935475746f3d02c34827e78354d7505200e2dab2",
+    "generatorSha256": "2776704867636a77b7c1bd1411e074b50177b2d6ed04b8c4464026d916a56eb2"
+  },
+  "cases": [
+    {
+      "name": "rectangular100",
+      "solver": "basic",
+      "source": [
+        20.0,
+        30.0,
+        50.0
+      ],
+      "target": [
+        40.0,
+        60.0
+      ],
+      "costs": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "observationParity": true,
+      "snapshots": [
+        {
+          "index": 0,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            0.3333333333333333,
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          "targetScaling": [
+            97.99521421906466,
+            116.19716784990705
+          ],
+          "plan": [
+            [
+              32.66507140635488,
+              1.381738997615718
+            ],
+            [
+              1.1652935400378286,
+              38.732389283302346
+            ],
+            [
+              6.169635053607282,
+              19.885871719081933
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            0.1958088463373117,
+            0.2506411222997139,
+            0.6396600462262466
+          ],
+          "targetScaling": [
+            97.99521421906466,
+            116.19716784990705
+          ],
+          "plan": [
+            [
+              19.188329842812774,
+              0.8116701571872216
+            ],
+            [
+              0.8762114420510639,
+              29.123788557948938
+            ],
+            [
+              11.83940713076852,
+              38.16059286923148
+            ]
+          ]
+        },
+        {
+          "index": 30,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            0.13177759838701206,
+            0.3119256686972606,
+            0.6692376561167805
+          ],
+          "targetScaling": [
+            148.52887807577298,
+            90.8781412266581
+          ],
+          "plan": [
+            [
+              19.572778843942693,
+              0.4272211561686267
+            ],
+            [
+              1.652775027811051,
+              28.347224972089418
+            ],
+            [
+              18.774446128246257,
+              31.225553871741948
+            ]
+          ]
+        },
+        {
+          "index": 30,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            0.1317775983862786,
+            0.3119256686982955,
+            0.6692376561169383
+          ],
+          "targetScaling": [
+            148.52887807577298,
+            90.8781412266581
+          ],
+          "plan": [
+            [
+              19.57277884383375,
+              0.4272211561662488
+            ],
+            [
+              1.6527750278165343,
+              28.347224972183465
+            ],
+            [
+              18.774446128250684,
+              31.225553871749316
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rectangular100",
+      "solver": "log-domain",
+      "source": [
+        20.0,
+        30.0,
+        50.0
+      ],
+      "target": [
+        40.0,
+        60.0
+      ],
+      "costs": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "observationParity": true,
+      "snapshots": [
+        {
+          "index": 0,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "targetScaling": [
+            3.486306354310679,
+            3.6566761823881895
+          ],
+          "plan": [
+            [
+              32.66507140635488,
+              1.3817389976157173
+            ],
+            [
+              1.1652935400378284,
+              38.73238928330233
+            ],
+            [
+              6.169635053607282,
+              19.885871719081926
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            -0.532004080761658,
+            -0.2851208659442639,
+            0.651793867143311
+          ],
+          "targetScaling": [
+            3.486306354310679,
+            3.6566761823881895
+          ],
+          "plan": [
+            [
+              19.188329842812774,
+              0.8116701571872212
+            ],
+            [
+              0.876211442051064,
+              29.123788557948934
+            ],
+            [
+              11.839407130768516,
+              38.16059286923146
+            ]
+          ]
+        },
+        {
+          "index": 30,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            -0.9280273494062214,
+            -0.06637807224345282,
+            0.69699624756338
+          ],
+          "targetScaling": [
+            3.9021671158254616,
+            3.4109072130438216
+          ],
+          "plan": [
+            [
+              19.572778843942693,
+              0.42722115616862644
+            ],
+            [
+              1.652775027811051,
+              28.347224972089418
+            ],
+            [
+              18.774446128246257,
+              31.225553871741944
+            ]
+          ]
+        },
+        {
+          "index": 30,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            -0.9280273494117877,
+            -0.06637807224013503,
+            0.6969962475636158
+          ],
+          "targetScaling": [
+            3.9021671158254616,
+            3.4109072130438216
+          ],
+          "plan": [
+            [
+              19.572778843833746,
+              0.4272211561662488
+            ],
+            [
+              1.6527750278165345,
+              28.347224972183465
+            ],
+            [
+              18.774446128250695,
+              31.225553871749323
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "zero_support100",
+      "solver": "basic",
+      "source": [
+        100.0,
+        0.0
+      ],
+      "target": [
+        0.0,
+        100.0
+      ],
+      "costs": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "regularization": 1,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "observationParity": true,
+      "snapshots": [
+        {
+          "index": 0,
+          "phase": "AfterDestination",
+          "rejected": true,
+          "sourceScaling": [
+            0.5,
+            0.5
+          ],
+          "targetScaling": [
+            0.0,
+            146.21171572600096
+          ],
+          "plan": [
+            [
+              0.0,
+              26.89414213699951
+            ],
+            [
+              0.0,
+              73.10585786300048
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "AfterSource",
+          "rejected": true,
+          "sourceScaling": [
+            1.8591409142295228,
+            {
+              "nonFinite": "NaN"
+            }
+          ],
+          "targetScaling": [
+            0.0,
+            146.21171572600096
+          ],
+          "plan": [
+            [
+              0.0,
+              100.0
+            ],
+            [
+              {
+                "nonFinite": "NaN"
+              },
+              {
+                "nonFinite": "NaN"
+              }
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "Restored",
+          "rejected": false,
+          "sourceScaling": [
+            0.5,
+            0.5
+          ],
+          "targetScaling": [
+            0.5,
+            0.5
+          ],
+          "plan": [
+            [
+              0.25,
+              0.09196986029286058
+            ],
+            [
+              0.09196986029286058,
+              0.25
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tiny_reg100",
+      "solver": "basic",
+      "source": [
+        90.0,
+        10.0
+      ],
+      "target": [
+        10.0,
+        90.0
+      ],
+      "costs": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "regularization": 0.0001,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "observationParity": true,
+      "snapshots": [
+        {
+          "index": 0,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            0.5,
+            0.5
+          ],
+          "targetScaling": [
+            20.0,
+            180.0
+          ],
+          "plan": [
+            [
+              10.0,
+              0.0
+            ],
+            [
+              0.0,
+              90.0
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            4.5,
+            0.05555555555555555
+          ],
+          "targetScaling": [
+            20.0,
+            180.0
+          ],
+          "plan": [
+            [
+              90.0,
+              0.0
+            ],
+            [
+              0.0,
+              10.0
+            ]
+          ]
+        },
+        {
+          "index": 321,
+          "phase": "AfterDestination",
+          "rejected": true,
+          "sourceScaling": [
+            1.0252163753230388e+306,
+            2.4385096260408355e-307
+          ],
+          "targetScaling": [
+            9.754038504163637e-306,
+            {
+              "nonFinite": "PositiveInfinity"
+            }
+          ],
+          "plan": [
+            [
+              10.0,
+              {
+                "nonFinite": "NaN"
+              }
+            ],
+            [
+              0.0,
+              {
+                "nonFinite": "PositiveInfinity"
+              }
+            ]
+          ]
+        },
+        {
+          "index": 321,
+          "phase": "AfterSource",
+          "rejected": true,
+          "sourceScaling": [
+            {
+              "nonFinite": "NaN"
+            },
+            0.0
+          ],
+          "targetScaling": [
+            9.754038504163637e-306,
+            {
+              "nonFinite": "PositiveInfinity"
+            }
+          ],
+          "plan": [
+            [
+              {
+                "nonFinite": "NaN"
+              },
+              {
+                "nonFinite": "NaN"
+              }
+            ],
+            [
+              0.0,
+              {
+                "nonFinite": "NaN"
+              }
+            ]
+          ]
+        },
+        {
+          "index": 321,
+          "phase": "Restored",
+          "rejected": false,
+          "sourceScaling": [
+            1.0252163753230388e+306,
+            2.4385096260408355e-307
+          ],
+          "targetScaling": [
+            8.778634653747274e-305,
+            4.1008655012922796e+307
+          ],
+          "plan": [
+            [
+              90.0,
+              0.0
+            ],
+            [
+              0.0,
+              10.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tiny_reg100",
+      "solver": "log-domain",
+      "source": [
+        90.0,
+        10.0
+      ],
+      "target": [
+        10.0,
+        90.0
+      ],
+      "costs": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "regularization": 0.0001,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "observationParity": true,
+      "snapshots": [
+        {
+          "index": 0,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            0.0,
+            0.0
+          ],
+          "targetScaling": [
+            2.302585092994046,
+            4.499809670330265
+          ],
+          "plan": [
+            [
+              10.000000000000002,
+              0.0
+            ],
+            [
+              0.0,
+              90.0
+            ]
+          ]
+        },
+        {
+          "index": 0,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            2.197224577336219,
+            -2.197224577336219
+          ],
+          "targetScaling": [
+            2.302585092994046,
+            4.499809670330265
+          ],
+          "plan": [
+            [
+              90.0,
+              0.0
+            ],
+            [
+              0.0,
+              10.000000000000002
+            ]
+          ]
+        },
+        {
+          "index": 999,
+          "phase": "AfterDestination",
+          "rejected": false,
+          "sourceScaling": [
+            2195.027352758834,
+            -2195.027352758834
+          ],
+          "targetScaling": [
+            -2192.72476766584,
+            2199.527162429164
+          ],
+          "plan": [
+            [
+              9.999999999998767,
+              0.0
+            ],
+            [
+              0.0,
+              89.99999999999872
+            ]
+          ]
+        },
+        {
+          "index": 999,
+          "phase": "AfterSource",
+          "rejected": false,
+          "sourceScaling": [
+            2197.22457733617,
+            -2197.22457733617
+          ],
+          "targetScaling": [
+            -2192.72476766584,
+            2199.527162429164
+          ],
+          "plan": [
+            [
+              89.99999999999872,
+              0.0
+            ],
+            [
+              0.0,
+              9.999999999998767
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+.git
+.github
+.superpowers
+.worktrees
+**/bin
+**/obj
+docs
+reference
+tests
