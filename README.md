@@ -10,6 +10,22 @@ Reusable C# Basic and LogDomain Sinkhorn library, with Python POT parity as an a
 - [Implementation plans](docs/superpowers/plans/2026-09-19-sinkhorn-tickets.md)
 - [Project issues](https://github.com/jayaraman-venkatesan/sinkhorn-dotnet/issues)
 
+## Architecture
+
+`SinkhornSolver.Solve` is the stable public entry point. It sends every call
+through a validation boundary that checks the problem and options and copies
+caller-owned arrays. The entry point then dispatches to separate Basic or
+LogDomain numerical cores; neither core silently substitutes the other.
+
+Calculation and assessment remain distinct: the selected core preserves its
+reference update and stopping behavior, while `PlanAssessment` independently
+computes finite/nonnegative and marginal-error checks for the returned
+`SolverResult`. Optional trace observation is another copied boundary: each
+`TraceFrame` owns scaling-array copies, so an observer cannot mutate live solver
+state. The console example consumes this same public API, and the multistage
+container publishes that example and runs it on the .NET runtime image—there is
+no second solver or service implementation in either path.
+
 ## Input rules
 
 A transport problem contains source weights, target weights, and a dense cost
