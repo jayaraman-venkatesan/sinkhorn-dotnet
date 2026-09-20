@@ -1,5 +1,26 @@
 # Local verification evidence
 
+## Controller verification after the final metadata correction
+
+On 2026-09-20, the controller independently checked production revision
+`773665f56a6a71d1b5465a2afaaef56f8964fabd` after the metadata/test-helper fix.
+Locked restore, `dotnet test -c Release --no-restore` (85 passed), Release build
+(zero warnings/errors), format verification and `tests/usage-smoke.sh` all
+exited 0 using the pinned SDK. The earlier sections retain historical evidence.
+
+The current native ARM64 image
+`sha256:ac84afb414ea08afad9497f8767872de9461fb7639512e00b4725d1eab47c4ae`
+ran successfully with `docker run --rm --network none`.
+The controller also rebuilt this revision with
+`docker build --platform linux/amd64 -t sinkhorn-library-check-amd64 .`.
+Image `sha256:9ff99886874c40478096680d896268af69b06a3e0ea34c03fcdea2bfe807cb52`
+inspected as `linux/amd64` and ran successfully with
+`docker run --rm --network none --platform linux/amd64 sinkhorn-library-check-amd64`.
+Both runs printed the three expected usage lines and exited 0.
+This updates the earlier pre-fix-only AMD64 evidence: the corrected production
+revision is now verified on native ARM64 and **emulated**, not native, AMD64.
+Remote CI, publication, PR creation and merge remain unperformed.
+
 This document records local evidence collected on 2026-09-20 for LIB-05. It is
 not a release, remote-CI, registry-publication, or merged-state claim.
 
