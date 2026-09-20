@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Sinkhorn/Sinkhorn.csproj" />
+  <Project Path="tests/Sinkhorn.Tests/Sinkhorn.Tests.csproj" />
+</Solution>
