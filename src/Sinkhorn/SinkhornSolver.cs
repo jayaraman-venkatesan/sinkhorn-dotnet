@@ -23,8 +23,11 @@ public static class SinkhornSolver
                 regularization,
                 effectiveOptions,
                 cancellationToken),
-            SolverKind.LogDomain => throw new NotSupportedException(
-                "The LogDomain solver is not implemented yet."),
+            SolverKind.LogDomain => LogDomainSolver.Solve(
+                prepared,
+                regularization,
+                effectiveOptions,
+                cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(solver), solver, "Unknown solver kind."),
         };
     }

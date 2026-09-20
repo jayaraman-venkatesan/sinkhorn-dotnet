@@ -1,9 +1,8 @@
 # sinkhorn-dotnet
 
-Status: in development. The Basic solver, explicit result assessment, public
-data contracts, input validation, and stable log-sum-exp primitive are
-implemented. LogDomain is not implemented yet and selecting it throws
-`NotSupportedException` in this intermediate development version.
+Status: in development. The Basic and LogDomain solvers, explicit result
+assessment, public data contracts, input validation, and stable log-sum-exp
+primitive are implemented.
 
 Reusable C# Basic and LogDomain Sinkhorn library, with Python POT parity as an acceptance requirement.
 
@@ -37,7 +36,7 @@ Validated problem arrays are copies, so later caller mutation does not affect
 solver input. Absolute stopping thresholds retain the units and scale of the
 supplied mass; the library does not silently normalize inputs.
 
-## Basic solver example
+## Solver example
 
 ```csharp
 using Sinkhorn;
@@ -47,15 +46,18 @@ var problem = new TransportProblem(
     [0.5, 0.5],
     new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
 
-SolverResult result = SinkhornSolver.Solve(problem, 1.0, SolverKind.Basic);
-if (result.Checks.Usable)
+foreach (SolverKind solver in new[] { SolverKind.Basic, SolverKind.LogDomain })
 {
-    Console.WriteLine($"Transport cost: {result.TransportCost}");
-    Console.WriteLine($"First route: {result.Plan[0, 0]}");
-}
-else
-{
-    Console.WriteLine($"No usable plan: {result.Termination}");
+    SolverResult result = SinkhornSolver.Solve(problem, 1.0, solver);
+    if (result.Checks.Usable)
+    {
+        Console.WriteLine($"{solver} transport cost: {result.TransportCost}");
+        Console.WriteLine($"First route: {result.Plan[0, 0]}");
+    }
+    else
+    {
+        Console.WriteLine($"No usable {solver} plan: {result.Termination}");
+    }
 }
 ```
 
@@ -67,6 +69,18 @@ threshold. For example, a zero-support Basic run can break down on its first
 update pair and return the restored initial diagnostic plan. That plan and its
 cost remain available for inspection, but it is not a feasible result and must
 not be used merely because its cost looks small.
+
+Basic returns ordinary scaling values and rolls back a numerically invalid
+update pair. LogDomain returns log scaling values (`Scaling.IsLog` is `true`),
+uses log-sum-exp updates, and does not add a rollback absent from the pinned
+source. The two coordinate arrays are therefore not directly comparable even
+when their plans agree.
+
+`Warnings` can include `diagnostic-overflow` when optional exponentiated log
+scalings or summary arithmetic overflow. The returned LogDomain coordinates
+remain logarithms and are never replaced by those exponentiated diagnostics.
+Inspect `Checks` independently: diagnostic overflow by itself does not make a
+finite, marginally feasible plan unusable.
 
 ## Development
 

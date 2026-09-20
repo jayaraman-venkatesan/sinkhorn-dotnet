@@ -2,54 +2,31 @@ namespace Sinkhorn.Tests;
 
 using System.Text.Json;
 
-public sealed class BasicSolverTests
+public sealed class LogDomainSolverTests
 {
     [Fact]
-    public void BasicMatchesSymmetricReference()
+    public void LogDomainSolvesZeroSupportWithoutChangingInputs()
     {
-        var problem = new TransportProblem(
-            [0.5, 0.5],
-            [0.5, 0.5],
-            new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
-
-        SolverResult result = SinkhornSolver.Solve(
-            problem,
-            1.0,
-            SolverKind.Basic,
+        var p = new TransportProblem([100, 0], [0, 100], new double[,] { { 0, 1 }, { 1, 0 } });
+        SolverResult r = SinkhornSolver.Solve(
+            p,
+            1,
+            SolverKind.LogDomain,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.InRange(result.Plan[0, 0], 0.365529289314, 0.365529289317);
-        Assert.Equal(0, result.LastAttemptedIndex);
-        Assert.True(result.Checks.Usable);
+        Assert.InRange(r.Plan[0, 1], 100 - 1e-10, 100 + 1e-10);
+        Assert.True(r.Checks.Usable);
+        Assert.Equal(0.0, p.Source[1]);
+        Assert.True(r.Scaling.IsLog);
     }
 
     [Fact]
-    public void BasicReturnsRejectedZeroSupportResult()
+    public void LogDomainMatchesPinnedPythonFixturesPerField()
     {
-        var problem = new TransportProblem(
-            [1.0, 0.0],
-            [0.0, 1.0],
-            new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
-
-        SolverResult result = SinkhornSolver.Solve(
-            problem,
-            1.0,
-            SolverKind.Basic,
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.Equal(TerminationReason.NumericalBreakdown, result.Termination);
-        Assert.Equal(1, result.AttemptedPairs);
-        Assert.Equal(0, result.AcceptedPairs);
-        Assert.False(result.Checks.Usable);
-    }
-
-    [Fact]
-    public void BasicMatchesPinnedPythonFixturesPerField()
-    {
-        string path = Path.Combine(AppContext.BaseDirectory, "Fixtures", "basic.json");
+        string path = Path.Combine(AppContext.BaseDirectory, "Fixtures", "log-domain.json");
         FixtureRoot fixture = JsonSerializer.Deserialize<FixtureRoot>(
             File.ReadAllText(path),
-            JsonOptions) ?? throw new InvalidOperationException("The Basic fixture was empty.");
+            JsonOptions) ?? throw new InvalidOperationException("The LogDomain fixture was empty.");
 
         Assert.Equal("0.9.6.post1", fixture.Provenance.PotVersion);
         Assert.Equal("3.12.3", fixture.Provenance.PythonVersion);
@@ -62,6 +39,11 @@ public sealed class BasicSolverTests
             fixture.Provenance.SourceSha256);
         Assert.Equal(64, fixture.Provenance.GeneratorSha256.Length);
         Assert.Equal(15, fixture.Cases.Length);
+        Assert.Contains(fixture.Cases, item => item.Name == "tiny_reg");
+        Assert.Contains(fixture.Cases, item => item.Name == "all_kernel_underflow");
+        Assert.Contains(fixture.Cases, item => item.Name == "rectangular_warm_start");
+        Assert.Contains(fixture.Cases, item => item.Name == "large_reg");
+        Assert.Contains(fixture.Cases, item => item.Name == "rectangular100");
 
         foreach (FixtureCase item in fixture.Cases)
         {
@@ -81,7 +63,7 @@ public sealed class BasicSolverTests
             SolverResult actual = SinkhornSolver.Solve(
                 problem,
                 item.Regularization,
-                SolverKind.Basic,
+                SolverKind.LogDomain,
                 options,
                 cancellationToken: TestContext.Current.CancellationToken);
 
@@ -91,14 +73,6 @@ public sealed class BasicSolverTests
             Assert.Equal(item.Expected.AcceptedPairs, actual.AcceptedPairs);
             Assert.Equal(item.Expected.Warnings, actual.Warnings);
             Assert.Equal(item.Expected.Checks.Usable, actual.Checks.Usable);
-
-            if (item.Extreme)
-            {
-                Assert.Equal(TerminationReason.NumericalBreakdown, actual.Termination);
-                Assert.Equal(actual.AttemptedPairs - 1, actual.AcceptedPairs);
-                continue;
-            }
-
             Assert.Equal(item.Expected.Errors.Length, actual.Errors.Length);
             for (int i = 0; i < actual.Errors.Length; i++)
             {
@@ -109,7 +83,7 @@ public sealed class BasicSolverTests
             AssertMatrixClose(item.Name, item.Expected.Plan, actual.Plan);
             AssertVectorClose(item.Name, item.Expected.SourceScaling, actual.Scaling.Source);
             AssertVectorClose(item.Name, item.Expected.TargetScaling, actual.Scaling.Target);
-            Assert.Equal(item.Expected.ScalingIsLog, actual.Scaling.IsLog);
+            Assert.True(actual.Scaling.IsLog);
             Assert.Equal(item.Expected.Checks.Finite, actual.Checks.Finite);
             Assert.Equal(item.Expected.Checks.Nonnegative, actual.Checks.Nonnegative);
             AssertClose(item.Name, item.Expected.Checks.SourceL1, actual.Checks.SourceL1);
@@ -117,31 +91,6 @@ public sealed class BasicSolverTests
             AssertClose(item.Name, item.Expected.Checks.TotalMass, actual.Checks.TotalMass);
             AssertClose(item.Name, item.Expected.TransportCost, actual.TransportCost);
         }
-    }
-
-    [Fact]
-    public void DiagnosticOverflowDoesNotInvalidateFinitePlan()
-    {
-        var problem = new TransportProblem(
-            [1.0, 1.0],
-            [1.0, 1.0],
-            new double[,]
-            {
-                { double.MaxValue, double.MaxValue },
-                { double.MaxValue, double.MaxValue },
-            });
-
-        SolverResult result = SinkhornSolver.Solve(
-            problem,
-            double.MaxValue,
-            SolverKind.Basic,
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        Assert.Equal(TerminationReason.ThresholdMet, result.Termination);
-        Assert.True(result.Checks.Finite);
-        Assert.True(result.Checks.Usable);
-        Assert.Equal(double.PositiveInfinity, result.TransportCost);
-        Assert.Equal(["diagnostic-overflow"], result.Warnings);
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -176,17 +125,40 @@ public sealed class BasicSolverTests
         }
     }
 
-    private static void AssertVectorClose(string name, double[] expected, double[] actual)
+    private static void AssertVectorClose(string name, JsonElement[] expected, double[] actual)
     {
         Assert.Equal(expected.Length, actual.Length);
         for (int i = 0; i < expected.Length; i++)
         {
-            AssertClose($"{name} scaling[{i}]", expected[i], actual[i]);
+            AssertClose($"{name} scaling[{i}]", Decode(expected[i]), actual[i]);
         }
+    }
+
+    private static double Decode(JsonElement value)
+    {
+        if (value.ValueKind == JsonValueKind.Number)
+        {
+            return value.GetDouble();
+        }
+
+        return value.GetProperty("nonFinite").GetString() switch
+        {
+            "NaN" => double.NaN,
+            "PositiveInfinity" => double.PositiveInfinity,
+            "NegativeInfinity" => double.NegativeInfinity,
+            string tag => throw new InvalidOperationException($"Unknown nonfinite tag '{tag}'."),
+            null => throw new InvalidOperationException("The nonfinite tag was null."),
+        };
     }
 
     private static void AssertClose(string name, double expected, double actual)
     {
+        if (!double.IsFinite(expected))
+        {
+            Assert.Equal(expected, actual);
+            return;
+        }
+
         double tolerance = 1e-12 + (1e-9 * Math.Abs(expected));
         Assert.True(
             Math.Abs(actual - expected) <= tolerance,
@@ -228,8 +200,8 @@ public sealed class BasicSolverTests
         int AcceptedPairs,
         FixtureError[] Errors,
         double[][] Plan,
-        double[] SourceScaling,
-        double[] TargetScaling,
+        JsonElement[] SourceScaling,
+        JsonElement[] TargetScaling,
         bool ScalingIsLog,
         FixtureChecks Checks,
         double TransportCost,

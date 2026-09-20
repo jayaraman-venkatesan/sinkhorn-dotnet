@@ -1,4 +1,4 @@
-"""Generate Basic Sinkhorn fixtures from the pinned POT implementation."""
+"""Generate Basic and LogDomain fixtures from the pinned POT implementation."""
 
 from __future__ import annotations
 
@@ -64,7 +64,11 @@ def measures(plan: np.ndarray, source: np.ndarray, target: np.ndarray) -> dict[s
     }
 
 
-def run_case(case: dict[str, Any]) -> dict[str, Any]:
+def run_case(case: dict[str, Any], solver_name: str) -> dict[str, Any]:
+    solver = {
+        "basic": ot.bregman.sinkhorn_knopp,
+        "log-domain": ot.bregman.sinkhorn_log,
+    }[solver_name]
     source = np.asarray(case["source"], dtype=np.float64)
     target = np.asarray(case["target"], dtype=np.float64)
     costs = np.asarray(case["costs"], dtype=np.float64)
@@ -76,7 +80,7 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         base_source = np.asarray(rectangular["source"], dtype=np.float64)
         base_target = np.asarray(rectangular["target"], dtype=np.float64)
         base_costs = np.asarray(rectangular["costs"], dtype=np.float64)
-        _, base_log = ot.bregman.sinkhorn_knopp(
+        _, base_log = solver(
             base_source,
             base_target,
             base_costs,
@@ -86,13 +90,17 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
             log=True,
             warn=True,
         )
-        warm_start = (np.log(base_log["u"]), np.log(base_log["v"]))
+        warm_start = (
+            (np.log(base_log["u"]), np.log(base_log["v"]))
+            if solver_name == "basic"
+            else (base_log["log_u"], base_log["log_v"])
+        )
     elif warm_start is not None:
         warm_start = tuple(np.asarray(values, dtype=np.float64) for values in warm_start)
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        plan, log = ot.bregman.sinkhorn_knopp(
+        plan, log = solver(
             source,
             target,
             costs,
@@ -105,7 +113,9 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         )
 
     messages = [str(item.message) for item in caught]
-    breakdown = any("numerical errors at iteration" in message for message in messages)
+    breakdown = solver_name == "basic" and any(
+        "numerical errors at iteration" in message for message in messages
+    )
     if breakdown:
         termination = "NumericalBreakdown"
     elif log["err"] and log["err"][-1] < threshold:
@@ -135,6 +145,8 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         checks["totalMass"],
         transport_cost,
         *log["err"],
+        *np.ravel(log["u"]),
+        *np.ravel(log["v"]),
     ]
     if any(not np.isfinite(value) for value in diagnostic_values):
         stable_warnings.append("diagnostic-overflow")
@@ -150,9 +162,9 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
             for index, value in enumerate(log["err"])
         ],
         "plan": plan,
-        "sourceScaling": log["u"],
-        "targetScaling": log["v"],
-        "scalingIsLog": False,
+        "sourceScaling": log["u"] if solver_name == "basic" else log["log_u"],
+        "targetScaling": log["v"] if solver_name == "basic" else log["log_v"],
+        "scalingIsLog": solver_name == "log-domain",
         "checks": checks,
         "transportCost": transport_cost,
         "warnings": stable_warnings,
@@ -211,23 +223,33 @@ def main() -> None:
     if actual_blob != SOURCE_GIT_BLOB:
         raise RuntimeError(f"Pinned source blob {SOURCE_GIT_BLOB} required; got {actual_blob}")
 
-    fixture = {
-        "provenance": {
-            "pythonVersion": platform.python_version(),
-            "potVersion": ot.__version__,
-            "numpyVersion": np.__version__,
-            "scipyVersion": scipy.__version__,
-            "potCommit": POT_COMMIT,
-            "sourceGitBlob": actual_blob,
-            "sourceSha256": hashlib.sha256(raw).hexdigest(),
-            "generatorSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        },
-        "cases": [run_case(case) for case in CASES],
+    provenance = {
+        "pythonVersion": platform.python_version(),
+        "potVersion": ot.__version__,
+        "numpyVersion": np.__version__,
+        "scipyVersion": scipy.__version__,
+        "potCommit": POT_COMMIT,
+        "sourceGitBlob": actual_blob,
+        "sourceSha256": hashlib.sha256(raw).hexdigest(),
+        "generatorSha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
-    output = Path(__file__).parents[1] / "tests" / "Sinkhorn.Tests" / "Fixtures" / "basic.json"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(fixture, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-    print(output)
+    fixture_directory = (
+        Path(__file__).parents[1] / "tests" / "Sinkhorn.Tests" / "Fixtures"
+    )
+    fixture_directory.mkdir(parents=True, exist_ok=True)
+    for solver_name, filename in (
+        ("basic", "basic.json"),
+        ("log-domain", "log-domain.json"),
+    ):
+        fixture = {
+            "provenance": provenance,
+            "cases": [run_case(case, solver_name) for case in CASES],
+        }
+        output = fixture_directory / filename
+        output.write_text(
+            json.dumps(fixture, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+        )
+        print(output)
 
 
 if __name__ == "__main__":
