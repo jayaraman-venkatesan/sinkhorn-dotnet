@@ -1,8 +1,8 @@
 # sinkhorn-dotnet
 
-Status: in development. The Basic and LogDomain solvers, explicit result
-assessment, public data contracts, input validation, and stable log-sum-exp
-primitive are implemented.
+Status: in development. The independently runnable implementation and its local
+verification evidence are awaiting repository review and an approved merge. No
+NuGet package or container image has been published.
 
 Reusable C# Basic and LogDomain Sinkhorn library, with Python POT parity as an acceptance requirement.
 
@@ -37,6 +37,19 @@ solver input. Absolute stopping thresholds retain the units and scale of the
 supplied mass; the library does not silently normalize inputs.
 
 ## Solver example
+
+Run the checked-in console example with the pinned .NET 10 SDK:
+
+```sh
+dotnet run --project examples/Usage -c Release
+```
+
+The example requires both ordinary solvers to return usable plans and requires
+the intentional Basic zero-support case to report `NumericalBreakdown`. It exits
+nonzero if any of those expectations changes. The same acceptance is available
+as `tests/usage-smoke.sh`.
+
+Library consumers should follow the same inspect-before-use pattern:
 
 ```csharp
 using Sinkhorn;
@@ -109,16 +122,73 @@ and is never reported as `ThresholdMet` or as a completed result.
 
 ## Development
 
-The repository pins .NET SDK 10.0.201. Run the current verification with:
+The repository pins .NET SDK 10.0.201 and uses NuGet lock files. Restore and run
+the local verification with:
 
 ```sh
-dotnet test
+dotnet restore --locked-mode
+dotnet test -c Release
 dotnet format --verify-no-changes
+dotnet build -c Release
+tests/usage-smoke.sh
 ```
 
-Development uses isolated feature worktrees and test-first tasks. Runnable
-solver usage and container instructions will be added with their verified
-implementation.
+The reference fixtures can be regenerated only with the pinned Python
+environment:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r reference/requirements.txt
+.venv/bin/python reference/generate_fixtures.py
+git diff --exit-code -- tests/Sinkhorn.Tests/Fixtures
+```
+
+The generator checks POT, NumPy, SciPy, the pinned upstream source Git blob, and
+its own provenance before writing fixtures. Generated files are acceptance
+oracles; review any diff rather than updating it mechanically.
+
+## Container usage
+
+The multistage image publishes and runs the same console example. Both Microsoft
+.NET base image versions and multi-architecture manifest digests are pinned in
+the `Dockerfile`.
+
+```sh
+docker build -t sinkhorn-library-check .
+docker run --rm sinkhorn-library-check
+```
+
+The first build requires network access to the pinned Microsoft images and
+NuGet source unless they are already cached. The repository does not push this
+image to a registry. See [verification evidence](docs/verification.md) for the
+architectures actually exercised; a manifest advertising an architecture is
+not treated as runtime evidence.
+
+## Precision and scope limitations
+
+- The first release is a dense, single-problem, CPU, double-precision library.
+  It does not provide GPU, autodifferentiation, sparse, batching, unbalanced-OT,
+  cost-generation, or whole-POT APIs.
+- Reference compatibility is tolerance based, not bitwise. Ordinary fixture
+  comparisons use `1e-12 + 1e-9 * abs(reference)` for entries and costs, with
+  marginal L1 error below `1e-8` in normalized cases.
+- Stopping thresholds and residuals are absolute in the supplied mass units.
+  Non-unit mass is preserved, and arbitrary magnitude stability is not promised.
+- Neither solver is guaranteed to converge within its budget. Basic can
+  underflow or break down and roll back; LogDomain avoids materializing the
+  direct kernel but can still exhaust or produce nonfinite diagnostics.
+- `TransportCost` is not the regularized objective, exact Wasserstein distance,
+  or Sinkhorn divergence. An unusable plan remains diagnostic output only.
+- There is no silent normalization, zero-support removal, solver fallback, or
+  retry. Cancellation throws rather than producing a completed result.
+
+## License and dependency audit
+
+This project is MIT licensed. POT provenance and its complete MIT notice,
+locked development/test dependencies, pinned container bases, and CI-only
+actions are recorded in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+The class library and console example have no third-party NuGet runtime package
+dependencies.
 
 ## Reference and attribution
 
@@ -129,3 +199,7 @@ Transport (POT) 0.9.6.post1 at commit
 notice and source/file credits in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 This C# validation layer intentionally adds explicit argument checks described
 above; those checks are not claimed as literal POT behavior.
+
+Cuturi's 2013 paper provides the regularized optimal-transport foundation; the
+upstream log-domain implementation also cites Feydy et al. (2019). Full links
+and file-level provenance are retained in the third-party notice.

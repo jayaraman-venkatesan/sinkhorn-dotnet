@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore locked dependencies
+        run: dotnet restore --locked-mode
+
+      - name: Test
+        run: dotnet test -c Release --no-restore
+
+      - name: Verify formatting
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+
+      - name: Run usage smoke acceptance
+        run: tests/usage-smoke.sh
+
+      - name: Build usage container
+        run: docker build -t sinkhorn-library-check .
+
+      - name: Run usage container
+        run: docker run --rm sinkhorn-library-check

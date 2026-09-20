@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="examples/Usage/Usage.csproj" />
   <Project Path="src/Sinkhorn/Sinkhorn.csproj" />
   <Project Path="tests/Sinkhorn.Tests/Sinkhorn.Tests.csproj" />
 </Solution>
