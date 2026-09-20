@@ -15,4 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Sinkhorn/Sinkhorn.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Fixtures/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
 # sinkhorn-dotnet
 
-Status: in development. The public data contracts, input validation, and stable
-log-sum-exp primitive are implemented. The Basic and LogDomain solvers are not
-implemented yet.
+Status: in development. The Basic solver, explicit result assessment, public
+data contracts, input validation, and stable log-sum-exp primitive are
+implemented. LogDomain is not implemented yet and selecting it throws
+`NotSupportedException` in this intermediate development version.
 
 Reusable C# Basic and LogDomain Sinkhorn library, with Python POT parity as an acceptance requirement.
 
@@ -35,6 +36,37 @@ matrix. Cost rows correspond to sources and columns correspond to targets.
 Validated problem arrays are copies, so later caller mutation does not affect
 solver input. Absolute stopping thresholds retain the units and scale of the
 supplied mass; the library does not silently normalize inputs.
+
+## Basic solver example
+
+```csharp
+using Sinkhorn;
+
+var problem = new TransportProblem(
+    [0.5, 0.5],
+    [0.5, 0.5],
+    new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
+
+SolverResult result = SinkhornSolver.Solve(problem, 1.0, SolverKind.Basic);
+if (result.Checks.Usable)
+{
+    Console.WriteLine($"Transport cost: {result.TransportCost}");
+    Console.WriteLine($"First route: {result.Plan[0, 0]}");
+}
+else
+{
+    Console.WriteLine($"No usable plan: {result.Termination}");
+}
+```
+
+`Termination` reports whether the pinned stopping threshold was met, the
+iteration budget was exhausted, or Basic encountered a numerical breakdown.
+It is deliberately separate from `Checks.Usable`, which also requires a finite,
+nonnegative plan and both final marginal L1 errors strictly below the requested
+threshold. For example, a zero-support Basic run can break down on its first
+update pair and return the restored initial diagnostic plan. That plan and its
+cost remain available for inspection, but it is not a feasible result and must
+not be used merely because its cost looks small.
 
 ## Development
 

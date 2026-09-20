@@ -1,0 +1,1356 @@
+{
+  "provenance": {
+    "pythonVersion": "3.12.3",
+    "potVersion": "0.9.6.post1",
+    "numpyVersion": "2.2.6",
+    "scipyVersion": "1.15.3",
+    "potCommit": "85113e9a380f5fcf684c50c73c1ff6a164a7366e",
+    "sourceGitBlob": "cf5efadfc0f33300899d9b8a20f762e5f96a2759",
+    "sourceSha256": "671958232afa87b8908d183c935475746f3d02c34827e78354d7505200e2dab2",
+    "generatorSha256": "64ee71dd54614f9c66250e332d4767fcffcddecc5931b2e975003116ba0a5153"
+  },
+  "cases": [
+    {
+      "name": "balanced",
+      "source": [
+        0.5,
+        0.5
+      ],
+      "target": [
+        0.5,
+        0.5
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 1,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 0.0
+          }
+        ],
+        "plan": [
+          [
+            0.36552928931500245,
+            0.13447071068499758
+          ],
+          [
+            0.13447071068499758,
+            0.36552928931500245
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.7310585786300049,
+          0.7310585786300049
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 0.0,
+          "totalMass": 1.0,
+          "usable": true
+        },
+        "transportCost": 0.26894142136999516,
+        "warnings": []
+      }
+    },
+    {
+      "name": "rectangular",
+      "source": [
+        0.2,
+        0.3,
+        0.5
+      ],
+      "target": [
+        0.4,
+        0.6
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 30,
+        "attemptedPairs": 31,
+        "acceptedPairs": 31,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 0.114495459522849
+          },
+          {
+            "index": 10,
+            "targetL2": 3.1453986088058286e-05
+          },
+          {
+            "index": 20,
+            "targetL2": 6.637315596347745e-09
+          },
+          {
+            "index": 30,
+            "targetL2": 1.4005617260074394e-12
+          }
+        ],
+        "plan": [
+          [
+            0.19572778843833752,
+            0.00427221156166249
+          ],
+          [
+            0.016527750278165335,
+            0.28347224972183466
+          ],
+          [
+            0.18774446128250682,
+            0.3122555387174932
+          ]
+        ],
+        "sourceScaling": [
+          0.1317775983862788,
+          0.3119256686982959,
+          0.6692376561169393
+        ],
+        "targetScaling": [
+          1.4852887807577273,
+          0.9087814122665798
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 1.9806378759312793e-12,
+          "totalMass": 1.0,
+          "usable": true
+        },
+        "transportCost": 0.17712330022457987,
+        "warnings": []
+      }
+    },
+    {
+      "name": "zero_support",
+      "source": [
+        1,
+        0
+      ],
+      "target": [
+        0,
+        1
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 1,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 0,
+        "errors": [],
+        "plan": [
+          [
+            0.25,
+            0.09196986029286058
+          ],
+          [
+            0.09196986029286058,
+            0.25
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.5,
+          0.5
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 1.0,
+          "targetL1": 1.0,
+          "totalMass": 0.6839397205857212,
+          "usable": false
+        },
+        "transportCost": 0.18393972058572117,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "tiny_reg",
+      "source": [
+        0.9,
+        0.1
+      ],
+      "target": [
+        0.1,
+        0.9
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 0.0001,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 323,
+        "attemptedPairs": 324,
+        "acceptedPairs": 323,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 10,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 20,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 30,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 40,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 50,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 60,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 70,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 80,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 90,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 100,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 110,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 120,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 130,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 140,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 150,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 160,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 170,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 180,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 190,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 200,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 210,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 220,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 230,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 240,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 250,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 260,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 270,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 280,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 290,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 300,
+            "targetL2": 1.1313708498984762
+          },
+          {
+            "index": 310,
+            "targetL2": 1.131370849898476
+          },
+          {
+            "index": 320,
+            "targetL2": 1.131370849898476
+          }
+        ],
+        "plan": [
+          [
+            0.9,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "sourceScaling": [
+          8.304252640116455e+307,
+          0.0
+        ],
+        "targetScaling": [
+          1.083782056018203e-308,
+          3.321701056046713e+307
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.1,
+          "targetL1": 1.7000000000000002,
+          "totalMass": 0.9,
+          "usable": false
+        },
+        "transportCost": 0.0,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "large_reg",
+      "source": [
+        0.2,
+        0.8
+      ],
+      "target": [
+        0.3,
+        0.7
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 10000000000.0,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 1.781905781839803e-11
+          }
+        ],
+        "plan": [
+          [
+            0.0600000000042,
+            0.13999999999579998
+          ],
+          [
+            0.23999999998319999,
+            0.5600000000168
+          ]
+        ],
+        "sourceScaling": [
+          0.200000000004,
+          0.799999999984
+        ],
+        "targetScaling": [
+          0.300000000015,
+          0.700000000035
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 1.3877787807814457e-16,
+          "targetL1": 2.5199897724093034e-11,
+          "totalMass": 0.9999999999999999,
+          "usable": true
+        },
+        "transportCost": 0.37999999997899997,
+        "warnings": []
+      }
+    },
+    {
+      "name": "zero_and_underflow",
+      "source": [
+        1,
+        0
+      ],
+      "target": [
+        0,
+        1
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 0.0001,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 0,
+        "errors": [],
+        "plan": [
+          [
+            0.25,
+            0.0
+          ],
+          [
+            0.0,
+            0.25
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.5,
+          0.5
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 1.0,
+          "targetL1": 1.0,
+          "totalMass": 0.5,
+          "usable": false
+        },
+        "transportCost": 0.0,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "all_kernel_underflow",
+      "source": [
+        0.5,
+        0.5
+      ],
+      "target": [
+        0.5,
+        0.5
+      ],
+      "costs": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "regularization": 0.0001,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 0,
+        "errors": [],
+        "plan": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.5,
+          0.5
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 1.0,
+          "targetL1": 1.0,
+          "totalMass": 0.0,
+          "usable": false
+        },
+        "transportCost": 0.0,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "rectangular_warm_start",
+      "source": [
+        0.2,
+        0.3,
+        0.5
+      ],
+      "target": [
+        0.4,
+        0.6
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": {
+        "sourceLogScaling": [
+          -2.026639638079901,
+          -1.1649903609082495,
+          -0.40161604110449856
+        ],
+        "targetLogScaling": [
+          0.3956092185054841,
+          -0.09565068427615542
+        ]
+      },
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 6.008351329089823e-13
+          }
+        ],
+        "plan": [
+          [
+            0.19572778843835478,
+            0.004272211561645237
+          ],
+          [
+            0.016527750278229784,
+            0.2834722497217702
+          ],
+          [
+            0.18774446128299066,
+            0.31225553871700934
+          ]
+        ],
+        "sourceScaling": [
+          0.13177759838596415,
+          0.31192566869873983,
+          0.6692376561170069
+        ],
+        "targetScaling": [
+          1.485288780761405,
+          0.9087814122650799
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 8.496536807456323e-13,
+          "totalMass": 1.0,
+          "usable": true
+        },
+        "transportCost": 0.17712330022477224,
+        "warnings": []
+      }
+    },
+    {
+      "name": "rectangular_one_pair",
+      "source": [
+        0.2,
+        0.3,
+        0.5
+      ],
+      "target": [
+        0.4,
+        0.6
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "maxIterations": 1,
+      "threshold": 1e-09,
+      "warmStart": null,
+      "expected": {
+        "termination": "IterationLimit",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 0.114495459522849
+          }
+        ],
+        "plan": [
+          [
+            0.1918832984281278,
+            0.008116701571872217
+          ],
+          [
+            0.00876211442051064,
+            0.2912378855794894
+          ],
+          [
+            0.1183940713076852,
+            0.3816059286923148
+          ]
+        ],
+        "sourceScaling": [
+          0.19580884633731174,
+          0.2506411222997139,
+          0.6396600462262467
+        ],
+        "targetScaling": [
+          0.9799521421906466,
+          1.1619716784990703
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 0.16192103168735283,
+          "totalMass": 1.0,
+          "usable": false
+        },
+        "transportCost": 0.15239703738468843,
+        "warnings": [
+          "iteration-limit"
+        ]
+      }
+    },
+    {
+      "name": "symmetric100",
+      "source": [
+        50,
+        50
+      ],
+      "target": [
+        50,
+        50
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 1,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 1.0048591735576161e-14
+          }
+        ],
+        "plan": [
+          [
+            36.55292893150025,
+            13.447071068499756
+          ],
+          [
+            13.447071068499756,
+            36.55292893150025
+          ]
+        ],
+        "sourceScaling": [
+          0.5000000000000001,
+          0.5000000000000001
+        ],
+        "targetScaling": [
+          73.10585786300048,
+          73.10585786300048
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 0.0,
+          "totalMass": 100.0,
+          "usable": true
+        },
+        "transportCost": 26.894142136999513,
+        "warnings": []
+      }
+    },
+    {
+      "name": "rectangular100",
+      "source": [
+        20,
+        30,
+        50
+      ],
+      "target": [
+        40,
+        60
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 30,
+        "attemptedPairs": 31,
+        "acceptedPairs": 31,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 11.449545952284906
+          },
+          {
+            "index": 10,
+            "targetL2": 0.0031453986088009612
+          },
+          {
+            "index": 20,
+            "targetL2": 6.637315608908485e-07
+          },
+          {
+            "index": 30,
+            "targetL2": 1.4004722301872494e-10
+          }
+        ],
+        "plan": [
+          [
+            19.57277884383375,
+            0.4272211561662488
+          ],
+          [
+            1.6527750278165343,
+            28.347224972183465
+          ],
+          [
+            18.774446128250684,
+            31.225553871749316
+          ]
+        ],
+        "sourceScaling": [
+          0.1317775983862786,
+          0.3119256686982955,
+          0.6692376561169383
+        ],
+        "targetScaling": [
+          148.52887807577298,
+          90.8781412266581
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 3.552713678800501e-15,
+          "targetL1": 1.9806378759312793e-10,
+          "totalMass": 100.0,
+          "usable": true
+        },
+        "transportCost": 17.71233002245799,
+        "warnings": []
+      }
+    },
+    {
+      "name": "rectangular_quarter",
+      "source": [
+        0.05,
+        0.075,
+        0.125
+      ],
+      "target": [
+        0.1,
+        0.15
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0.5,
+          0.2
+        ]
+      ],
+      "regularization": 0.3,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 30,
+        "attemptedPairs": 31,
+        "acceptedPairs": 31,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 0.02862386488071225
+          },
+          {
+            "index": 10,
+            "targetL2": 7.863496522014572e-06
+          },
+          {
+            "index": 20,
+            "targetL2": 1.6593288990869363e-09
+          },
+          {
+            "index": 30,
+            "targetL2": 3.5014043150185984e-13
+          }
+        ],
+        "plan": [
+          [
+            0.04893194710958438,
+            0.0010680528904156224
+          ],
+          [
+            0.004131937569541334,
+            0.07086806243045866
+          ],
+          [
+            0.046936115320626706,
+            0.0780638846793733
+          ]
+        ],
+        "sourceScaling": [
+          0.1317775983862788,
+          0.3119256686982959,
+          0.6692376561169393
+        ],
+        "targetScaling": [
+          0.3713221951894318,
+          0.22719535306664496
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 4.951594689828198e-13,
+          "totalMass": 0.25,
+          "usable": true
+        },
+        "transportCost": 0.044280825056144967,
+        "warnings": []
+      }
+    },
+    {
+      "name": "tiny_reg100",
+      "source": [
+        90,
+        10
+      ],
+      "target": [
+        10,
+        90
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 0.0001,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 321,
+        "attemptedPairs": 322,
+        "acceptedPairs": 321,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 10,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 20,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 30,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 40,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 50,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 60,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 70,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 80,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 90,
+            "targetL2": 113.13708498984762
+          },
+          {
+            "index": 100,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 110,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 120,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 130,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 140,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 150,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 160,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 170,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 180,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 190,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 200,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 210,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 220,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 230,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 240,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 250,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 260,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 270,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 280,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 290,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 300,
+            "targetL2": 113.1370849898476
+          },
+          {
+            "index": 310,
+            "targetL2": 113.13708498984761
+          },
+          {
+            "index": 320,
+            "targetL2": 113.13708498984761
+          }
+        ],
+        "plan": [
+          [
+            90.0,
+            0.0
+          ],
+          [
+            0.0,
+            10.0
+          ]
+        ],
+        "sourceScaling": [
+          1.0252163753230388e+306,
+          2.4385096260408355e-307
+        ],
+        "targetScaling": [
+          8.778634653747274e-305,
+          4.1008655012922796e+307
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 160.0,
+          "totalMass": 100.0,
+          "usable": false
+        },
+        "transportCost": 0.0,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "zero_support100",
+      "source": [
+        100,
+        0
+      ],
+      "target": [
+        0,
+        100
+      ],
+      "costs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "regularization": 1,
+      "extreme": true,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "NumericalBreakdown",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 0,
+        "errors": [],
+        "plan": [
+          [
+            0.25,
+            0.09196986029286058
+          ],
+          [
+            0.09196986029286058,
+            0.25
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.5,
+          0.5
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 100.0,
+          "targetL1": 100.0,
+          "totalMass": 0.6839397205857212,
+          "usable": false
+        },
+        "transportCost": 0.18393972058572117,
+        "warnings": [
+          "numerical-breakdown"
+        ]
+      }
+    },
+    {
+      "name": "negative_costs",
+      "source": [
+        0.5,
+        0.5
+      ],
+      "target": [
+        0.5,
+        0.5
+      ],
+      "costs": [
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          -1
+        ]
+      ],
+      "regularization": 0.5,
+      "threshold": 1e-09,
+      "maxIterations": 1000,
+      "warmStart": null,
+      "expected": {
+        "termination": "ThresholdMet",
+        "lastAttemptedIndex": 0,
+        "attemptedPairs": 1,
+        "acceptedPairs": 1,
+        "errors": [
+          {
+            "index": 0,
+            "targetL2": 5.551115123125783e-17
+          }
+        ],
+        "plan": [
+          [
+            0.4403985389889412,
+            0.05960146101105877
+          ],
+          [
+            0.05960146101105877,
+            0.4403985389889412
+          ]
+        ],
+        "sourceScaling": [
+          0.5,
+          0.5
+        ],
+        "targetScaling": [
+          0.11920292202211755,
+          0.11920292202211755
+        ],
+        "scalingIsLog": false,
+        "checks": {
+          "finite": true,
+          "nonnegative": true,
+          "sourceL1": 0.0,
+          "targetL1": 0.0,
+          "totalMass": 1.0,
+          "usable": true
+        },
+        "transportCost": -0.8807970779778824,
+        "warnings": []
+      }
+    }
+  ]
+}
