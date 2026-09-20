@@ -98,7 +98,7 @@ internal static class BasicSolver
             problem,
             options.Threshold,
             termination);
-        double transportCost = TransportCost(plan, problem.Costs);
+        double transportCost = Numerics.TransportCost(plan, problem.Costs);
         string[] warnings = Warnings(termination, checks, transportCost, errors);
 
         return new SolverResult(
@@ -201,20 +201,6 @@ internal static class BasicSolver
         }
 
         return plan;
-    }
-
-    private static double TransportCost(double[,] plan, double[,] costs)
-    {
-        double total = 0.0;
-        for (int i = 0; i < plan.GetLength(0); i++)
-        {
-            for (int j = 0; j < plan.GetLength(1); j++)
-            {
-                total += plan[i, j] * costs[i, j];
-            }
-        }
-
-        return total;
     }
 
     private static string[] Warnings(
