@@ -11,4 +11,5 @@ public sealed record SolverResult(
     ScalingDiagnostics Scaling,
     PlanChecks Checks,
     double TransportCost,
-    string[] Warnings);
+    string[] Warnings,
+    SolverMetadata Metadata);

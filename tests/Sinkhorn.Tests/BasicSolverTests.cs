@@ -68,7 +68,7 @@ public sealed class BasicSolverTests
             var problem = new TransportProblem(
                 item.Source,
                 item.Target,
-                Rectangular(item.Costs));
+                FixtureConversion.ToRectangular(item.Costs));
             var options = new SolverOptions(
                 item.MaxIterations,
                 item.Threshold,
@@ -148,20 +148,6 @@ public sealed class BasicSolverTests
     {
         PropertyNameCaseInsensitive = true,
     };
-
-    private static double[,] Rectangular(double[][] values)
-    {
-        var result = new double[values.Length, values[0].Length];
-        for (int i = 0; i < values.Length; i++)
-        {
-            for (int j = 0; j < values[i].Length; j++)
-            {
-                result[i, j] = values[i][j];
-            }
-        }
-
-        return result;
-    }
 
     private static void AssertMatrixClose(string name, double[][] expected, double[,] actual)
     {

@@ -119,3 +119,38 @@ those platforms.
 
 No NuGet publication, registry push, PR, merge, account creation, or paid
 service was performed.
+
+## Final whole-library fix verification
+
+This section records fresh evidence for the final-fix source tree based on
+`18df0414d6bd1c422e405747abbc663be3c22896`. It is separate from the earlier
+LIB-05 image evidence above: production source changed to add result metadata,
+so the default native image was rebuilt and rerun. The prior emulated-amd64
+artifact was not treated as evidence for this changed source tree.
+
+The metadata TDD seam compiled before implementation. The first sandboxed test
+attempt was aborted by denied test-runner IPC and was not counted as RED. The
+same focused command outside that restriction then produced nine expected
+assertion failures against placeholder metadata: both solvers lacked default,
+custom, discrepant-mass, and fallback values, and the Basic numerical-failure
+result lacked its run data. After implementation, the focused metadata plus
+observer-parity run passed 13 of 13 cases. After extracting shared fixture
+conversion/decoding helpers, the solver/trace/metadata focus passed 25 of 25.
+
+Fresh final commands all exited 0:
+
+| Command | Observed result |
+| --- | --- |
+| `/Users/jayaramanvenkatesan/.dotnet/dotnet restore --locked-mode` | All three projects restored from lock files |
+| `/Users/jayaramanvenkatesan/.dotnet/dotnet test -c Release --no-restore` | 85 passed, 0 failed, 0 skipped |
+| `/Users/jayaramanvenkatesan/.dotnet/dotnet format --verify-no-changes --no-restore` | No output or formatting differences |
+| `/Users/jayaramanvenkatesan/.dotnet/dotnet build -c Release --no-restore` | Build succeeded with 0 warnings and 0 errors |
+| `DOTNET_COMMAND=/Users/jayaramanvenkatesan/.dotnet/dotnet tests/usage-smoke.sh` | Printed all three required usage lines |
+| `/opt/homebrew/bin/docker build -t sinkhorn-library-final-fix-check .` | Built image `sha256:ac84afb414ea08afad9497f8767872de9461fb7639512e00b4725d1eab47c4ae` |
+| `/opt/homebrew/bin/docker run --rm --network none sinkhorn-library-final-fix-check` | Printed all three required usage lines |
+
+Image inspection reported `linux/arm64`; this is native arm64 evidence from the
+Docker Desktop Linux/aarch64 daemon. No amd64 image was rebuilt or run for this
+final-fix tree, so this section makes no current amd64 execution claim. The
+earlier emulated-amd64 evidence remains accurate only for its recorded pre-fix
+image.

@@ -7,7 +7,8 @@ internal static class LogDomainSolver
         double regularization,
         SolverOptions options,
         ITraceObserver? observer,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        SolverMetadata metadata)
     {
         cancellationToken.ThrowIfCancellationRequested();
         int sourceCount = problem.Source.Length;
@@ -129,7 +130,8 @@ internal static class LogDomainSolver
                 true),
             checks,
             transportCost,
-            warnings);
+            warnings,
+            metadata);
     }
 
     private static void Observe(

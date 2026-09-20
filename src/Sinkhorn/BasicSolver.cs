@@ -7,7 +7,8 @@ internal static class BasicSolver
         double regularization,
         SolverOptions options,
         ITraceObserver? observer,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        SolverMetadata metadata)
     {
         cancellationToken.ThrowIfCancellationRequested();
         int sourceCount = problem.Source.Length;
@@ -146,7 +147,8 @@ internal static class BasicSolver
                 false),
             checks,
             transportCost,
-            warnings);
+            warnings,
+            metadata);
     }
 
     private static void Observe(

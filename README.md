@@ -26,6 +26,20 @@ state. The console example consumes this same public API, and the multistage
 container publishes that example and runs it on the .NET runtime image—there is
 no second solver or service implementation in either path.
 
+Every completed result, including an exhausted or numerically failed run, also
+contains a `SolverMetadata` snapshot. It records the selected solver, pinned POT
+version and commit, regularization, effective `SolverOptions`, preprocessing
+policy (`none`), and both prepared input totals. Empty-vector fallback is applied
+before those totals are captured; an accepted mass discrepancy remains visible
+as two different totals. Warm-start arrays in `EffectiveOptions` are owned copies
+captured before observer callbacks, not aliases of caller arrays.
+
+This metadata is an additive final-review correction required by the
+[approved numerical result contract](docs/research/paper-arxiv-1306-0895-sinkhorn-shift-lab/library-contract-proposal.md#what-every-result-reports).
+The [controller's spec-versus-plan ruling](docs/adr/0001-reference-semantics.md#final-review-amendment-result-provenance-snapshot)
+records why the normative contract supersedes the original plan's incomplete
+`SolverResult` shape; the original plan is retained as historical evidence.
+
 ## Input rules
 
 A transport problem contains source weights, target weights, and a dense cost

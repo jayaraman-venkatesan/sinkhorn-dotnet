@@ -155,7 +155,10 @@ public sealed class TraceTests
             };
             var collector = new Collector();
             SolverResult result = SinkhornSolver.Solve(
-                new TransportProblem(item.Source, item.Target, Rectangular(item.Costs)),
+                new TransportProblem(
+                    item.Source,
+                    item.Target,
+                    FixtureConversion.ToRectangular(item.Costs)),
                 item.Regularization,
                 solver,
                 new SolverOptions(item.MaxIterations, item.Threshold),
@@ -198,20 +201,6 @@ public sealed class TraceTests
         [20.0, 30.0, 50.0],
         [40.0, 60.0],
         new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 }, { 0.5, 0.2 } });
-
-    private static double[,] Rectangular(double[][] values)
-    {
-        var result = new double[values.Length, values[0].Length];
-        for (int i = 0; i < values.Length; i++)
-        {
-            for (int j = 0; j < values[i].Length; j++)
-            {
-                result[i, j] = values[i][j];
-            }
-        }
-
-        return result;
-    }
 
     private static double[,] Materialize(PhaseFixtureCase item, TraceFrame frame)
     {
@@ -256,6 +245,34 @@ public sealed class TraceTests
         Assert.Equal(expected.Checks.Usable, actual.Checks.Usable);
         AssertDoubleExactlyEqual(expected.TransportCost, actual.TransportCost);
         Assert.Equal(expected.Warnings, actual.Warnings);
+        Assert.Equal(expected.Metadata.Solver, actual.Metadata.Solver);
+        Assert.Equal(expected.Metadata.ReferenceVersion, actual.Metadata.ReferenceVersion);
+        Assert.Equal(expected.Metadata.ReferenceCommit, actual.Metadata.ReferenceCommit);
+        AssertDoubleExactlyEqual(expected.Metadata.Regularization, actual.Metadata.Regularization);
+        Assert.Equal(
+            expected.Metadata.EffectiveOptions.MaxIterations,
+            actual.Metadata.EffectiveOptions.MaxIterations);
+        AssertDoubleExactlyEqual(
+            expected.Metadata.EffectiveOptions.Threshold,
+            actual.Metadata.EffectiveOptions.Threshold);
+        AssertWarmStartsExactlyEqual(
+            expected.Metadata.EffectiveOptions.WarmStart,
+            actual.Metadata.EffectiveOptions.WarmStart);
+        Assert.Equal(expected.Metadata.PreprocessingPolicy, actual.Metadata.PreprocessingPolicy);
+        AssertDoubleExactlyEqual(expected.Metadata.SourceTotal, actual.Metadata.SourceTotal);
+        AssertDoubleExactlyEqual(expected.Metadata.TargetTotal, actual.Metadata.TargetTotal);
+    }
+
+    private static void AssertWarmStartsExactlyEqual(WarmStart? expected, WarmStart? actual)
+    {
+        if (expected is null || actual is null)
+        {
+            Assert.Equal(expected, actual);
+            return;
+        }
+
+        AssertVectorExactlyEqual(expected.SourceLogScaling, actual.SourceLogScaling);
+        AssertVectorExactlyEqual(expected.TargetLogScaling, actual.TargetLogScaling);
     }
 
     private static void AssertMatrixExactlyEqual(double[,] expected, double[,] actual)
@@ -291,7 +308,10 @@ public sealed class TraceTests
         {
             for (int j = 0; j < expected[i].Length; j++)
             {
-                AssertClose($"{name} plan[{i},{j}]", Decode(expected[i][j]), actual[i, j]);
+                AssertClose(
+                    $"{name} plan[{i},{j}]",
+                    FixtureConversion.DecodeDouble(expected[i][j]),
+                    actual[i, j]);
             }
         }
     }
@@ -301,25 +321,11 @@ public sealed class TraceTests
         Assert.Equal(expected.Length, actual.Length);
         for (int i = 0; i < expected.Length; i++)
         {
-            AssertClose($"{name} scaling[{i}]", Decode(expected[i]), actual[i]);
+            AssertClose(
+                $"{name} scaling[{i}]",
+                FixtureConversion.DecodeDouble(expected[i]),
+                actual[i]);
         }
-    }
-
-    private static double Decode(JsonElement value)
-    {
-        if (value.ValueKind == JsonValueKind.Number)
-        {
-            return value.GetDouble();
-        }
-
-        return value.GetProperty("nonFinite").GetString() switch
-        {
-            "NaN" => double.NaN,
-            "PositiveInfinity" => double.PositiveInfinity,
-            "NegativeInfinity" => double.NegativeInfinity,
-            string tag => throw new InvalidOperationException($"Unknown nonfinite tag '{tag}'."),
-            null => throw new InvalidOperationException("The nonfinite tag was null."),
-        };
     }
 
     private static void AssertClose(string name, double expected, double actual)

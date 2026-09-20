@@ -15,6 +15,11 @@ public static class SinkhornSolver
             problem,
             regularization,
             effectiveOptions);
+        SolverMetadata metadata = SolverMetadata.Create(
+            solver,
+            prepared,
+            regularization,
+            effectiveOptions);
 
         return solver switch
         {
@@ -23,13 +28,15 @@ public static class SinkhornSolver
                 regularization,
                 effectiveOptions,
                 observer,
-                cancellationToken),
+                cancellationToken,
+                metadata),
             SolverKind.LogDomain => LogDomainSolver.Solve(
                 prepared,
                 regularization,
                 effectiveOptions,
                 observer,
-                cancellationToken),
+                cancellationToken,
+                metadata),
             _ => throw new ArgumentOutOfRangeException(nameof(solver), solver, "Unknown solver kind."),
         };
     }

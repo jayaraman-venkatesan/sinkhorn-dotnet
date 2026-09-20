@@ -50,7 +50,7 @@ public sealed class LogDomainSolverTests
             var problem = new TransportProblem(
                 item.Source,
                 item.Target,
-                Rectangular(item.Costs));
+                FixtureConversion.ToRectangular(item.Costs));
             var options = new SolverOptions(
                 item.MaxIterations,
                 item.Threshold,
@@ -98,20 +98,6 @@ public sealed class LogDomainSolverTests
         PropertyNameCaseInsensitive = true,
     };
 
-    private static double[,] Rectangular(double[][] values)
-    {
-        var result = new double[values.Length, values[0].Length];
-        for (int i = 0; i < values.Length; i++)
-        {
-            for (int j = 0; j < values[i].Length; j++)
-            {
-                result[i, j] = values[i][j];
-            }
-        }
-
-        return result;
-    }
-
     private static void AssertMatrixClose(string name, double[][] expected, double[,] actual)
     {
         Assert.Equal(expected.Length, actual.GetLength(0));
@@ -130,25 +116,11 @@ public sealed class LogDomainSolverTests
         Assert.Equal(expected.Length, actual.Length);
         for (int i = 0; i < expected.Length; i++)
         {
-            AssertClose($"{name} scaling[{i}]", Decode(expected[i]), actual[i]);
+            AssertClose(
+                $"{name} scaling[{i}]",
+                FixtureConversion.DecodeDouble(expected[i]),
+                actual[i]);
         }
-    }
-
-    private static double Decode(JsonElement value)
-    {
-        if (value.ValueKind == JsonValueKind.Number)
-        {
-            return value.GetDouble();
-        }
-
-        return value.GetProperty("nonFinite").GetString() switch
-        {
-            "NaN" => double.NaN,
-            "PositiveInfinity" => double.PositiveInfinity,
-            "NegativeInfinity" => double.NegativeInfinity,
-            string tag => throw new InvalidOperationException($"Unknown nonfinite tag '{tag}'."),
-            null => throw new InvalidOperationException("The nonfinite tag was null."),
-        };
     }
 
     private static void AssertClose(string name, double expected, double actual)
