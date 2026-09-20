@@ -82,6 +82,29 @@ remain logarithms and are never replaced by those exponentiated diagnostics.
 Inspect `Checks` independently: diagnostic overflow by itself does not make a
 finite, marginally feasible plan unusable.
 
+## Phase observation and cancellation
+
+Pass an `ITraceObserver` to `SinkhornSolver.Solve` to receive solver-coordinate
+snapshots without changing the numerical calculation. `Initial` has index `-1`;
+each attempted pair then emits `AfterDestination` followed by `AfterSource`.
+Basic additionally emits `Restored` after rolling back a numerical breakdown.
+Basic frames contain ordinary scalings, while LogDomain frames contain log
+scalings.
+
+Every frame owns copies of both scaling arrays. An observer may retain or mutate
+those arrays without changing live solver state or later frames. Ordinary frames
+have `Rejected == false`, which means they remain provisional until the next
+pair is accepted or the solve returns successfully. A later `Restored` frame at
+the same index identifies that pair's earlier update frames as rejected;
+collectors that retain them must mark that relationship in their own view rather
+than expecting old immutable snapshots to change.
+
+Observer exceptions are caller exceptions and propagate from `Solve`; they are
+not converted to numerical termination results. Cancellation is checked before
+work starts and before every update pair. A requested cancellation throws
+`OperationCanceledException`, including cancellation requested by an observer
+between pairs, and is never reported as `ThresholdMet` or as a completed result.
+
 ## Development
 
 The repository pins .NET SDK 10.0.201. Run the current verification with:

@@ -6,8 +6,10 @@ internal static class LogDomainSolver
         TransportProblem problem,
         double regularization,
         SolverOptions options,
+        ITraceObserver? observer,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         int sourceCount = problem.Source.Length;
         int targetCount = problem.Target.Length;
         var scaledCost = new double[sourceCount, targetCount];
@@ -34,6 +36,13 @@ internal static class LogDomainSolver
         int lastAttemptedIndex = -1;
         int attemptedPairs = 0;
 
+        Observe(
+            observer,
+            -1,
+            TracePhase.Initial,
+            sourceLogScaling,
+            targetLogScaling);
+
         for (int index = 0; index < options.MaxIterations; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -50,6 +59,13 @@ internal static class LogDomainSolver
                 targetLogScaling[j] = logTarget[j] - Numerics.LogSumExp(sourceTerms);
             }
 
+            Observe(
+                observer,
+                index,
+                TracePhase.AfterDestination,
+                sourceLogScaling,
+                targetLogScaling);
+
             for (int i = 0; i < sourceCount; i++)
             {
                 for (int j = 0; j < targetCount; j++)
@@ -59,6 +75,13 @@ internal static class LogDomainSolver
 
                 sourceLogScaling[i] = logSource[i] - Numerics.LogSumExp(targetTerms);
             }
+
+            Observe(
+                observer,
+                index,
+                TracePhase.AfterSource,
+                sourceLogScaling,
+                targetLogScaling);
 
             if (index % 10 == 0)
             {
@@ -106,6 +129,23 @@ internal static class LogDomainSolver
             checks,
             transportCost,
             warnings);
+    }
+
+    private static void Observe(
+        ITraceObserver? observer,
+        int index,
+        TracePhase phase,
+        double[] sourceScaling,
+        double[] targetScaling)
+    {
+        observer?.Observe(
+            new TraceFrame(
+                index,
+                phase,
+                SolverKind.LogDomain,
+                (double[])sourceScaling.Clone(),
+                (double[])targetScaling.Clone(),
+                false));
     }
 
     private static double[] InitializeScaling(int count, double[]? warmStart)

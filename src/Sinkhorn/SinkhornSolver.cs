@@ -22,11 +22,13 @@ public static class SinkhornSolver
                 prepared,
                 regularization,
                 effectiveOptions,
+                observer,
                 cancellationToken),
             SolverKind.LogDomain => LogDomainSolver.Solve(
                 prepared,
                 regularization,
                 effectiveOptions,
+                observer,
                 cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(solver), solver, "Unknown solver kind."),
         };

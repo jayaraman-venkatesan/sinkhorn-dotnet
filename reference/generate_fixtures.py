@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import platform
+import sys
 import warnings
 from pathlib import Path
 from typing import Any
@@ -48,6 +50,16 @@ def tagged(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [tagged(item) for item in value]
     return value
+
+
+def same(left: Any, right: Any) -> bool:
+    if isinstance(left, dict):
+        return left.keys() == right.keys() and all(
+            same(left[key], right[key]) for key in left
+        )
+    return bool(
+        np.array_equal(np.asarray(left), np.asarray(right), equal_nan=True)
+    )
 
 
 def measures(plan: np.ndarray, source: np.ndarray, target: np.ndarray) -> dict[str, Any]:
@@ -188,6 +200,139 @@ def run_case(case: dict[str, Any], solver_name: str) -> dict[str, Any]:
     return tagged(fixture_case)
 
 
+def run_observed_case(case: dict[str, Any], solver_name: str) -> dict[str, Any]:
+    solver = {
+        "basic": ot.bregman.sinkhorn_knopp,
+        "log-domain": ot.bregman.sinkhorn_log,
+    }[solver_name]
+    source = np.asarray(case["source"], dtype=np.float64)
+    target = np.asarray(case["target"], dtype=np.float64)
+    costs = np.asarray(case["costs"], dtype=np.float64)
+    threshold = case.get("threshold", DEFAULT_THRESHOLD)
+    max_iterations = case.get("maxIterations", 1000)
+
+    lines, start = inspect.getsourcelines(solver)
+    targets = {}
+    for offset, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped in (
+            "v = b / KtransposeU",
+            "v = logb - nx.logsumexp(Mr + u[:, None], 0)",
+        ):
+            targets[start + offset] = "AfterDestination"
+        if stripped in (
+            "u = 1.0 / nx.dot(Kp, v)",
+            "u = loga - nx.logsumexp(Mr + v[None, :], 1)",
+        ):
+            targets[start + offset] = "AfterSource"
+        if stripped == "v = vprev":
+            targets[start + offset] = "Restored"
+
+    assert list(targets.values()).count("AfterDestination") == 1
+    assert list(targets.values()).count("AfterSource") == 1
+
+    events = []
+    previous = None
+
+    def observer(frame: Any, event: str, _argument: Any) -> Any:
+        nonlocal previous
+        if frame.f_code is not solver.__code__:
+            return None
+        if event in ("line", "return"):
+            if previous in targets:
+                local = frame.f_locals
+                events.append(
+                    (
+                        int(local["ii"]),
+                        targets[previous],
+                        local["u"].copy(),
+                        local["v"].copy(),
+                    )
+                )
+            previous = frame.f_lineno if event == "line" else None
+        return observer
+
+    def invoke(trace: bool) -> tuple[np.ndarray, dict[str, Any], list[tuple[str, str]]]:
+        previous_trace = sys.gettrace()
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            try:
+                if trace:
+                    sys.settrace(observer)
+                plan, log = solver(
+                    source,
+                    target,
+                    costs,
+                    case["regularization"],
+                    numItermax=max_iterations,
+                    stopThr=threshold,
+                    log=True,
+                    warn=True,
+                )
+            finally:
+                sys.settrace(previous_trace)
+        warning_values = [
+            (item.category.__name__, str(item.message)) for item in caught
+        ]
+        return plan, log, warning_values
+
+    unobserved_plan, unobserved_log, unobserved_warnings = invoke(False)
+    observed_plan, log, observed_warnings = invoke(True)
+    assert same(unobserved_plan, observed_plan)
+    assert same(unobserved_log, log)
+    assert unobserved_warnings == observed_warnings
+
+    rejected_indices = {
+        index for index, phase, _, _ in events if phase == "Restored"
+    }
+    retained_indices = {0, int(log["niter"]), *rejected_indices}
+    snapshots = []
+    for index, phase, source_scaling, target_scaling in events:
+        if index not in retained_indices:
+            continue
+        with np.errstate(all="ignore"):
+            if solver_name == "basic":
+                plan = (
+                    source_scaling[:, None]
+                    * np.exp(costs / -case["regularization"])
+                    * target_scaling[None, :]
+                )
+            else:
+                plan = np.exp(
+                    costs / -case["regularization"]
+                    + source_scaling[:, None]
+                    + target_scaling[None, :]
+                )
+        snapshots.append(
+            {
+                "index": index,
+                "phase": phase,
+                "rejected": (
+                    index in rejected_indices
+                    and phase in ("AfterDestination", "AfterSource")
+                ),
+                "sourceScaling": source_scaling,
+                "targetScaling": target_scaling,
+                "plan": plan,
+            }
+        )
+
+    return tagged(
+        {
+            "name": case["name"],
+            "solver": solver_name,
+            "source": source,
+            "target": target,
+            "costs": costs,
+            "regularization": case["regularization"],
+            "threshold": threshold,
+            "maxIterations": max_iterations,
+            "observationParity": True,
+            "snapshots": snapshots,
+        }
+    )
+
+
 RECTANGULAR_COSTS = [[0, 1], [1, 0], [0.5, 0.2]]
 SYMMETRIC_COSTS = [[0, 1], [1, 0]]
 CASES = [
@@ -250,6 +395,24 @@ def main() -> None:
             json.dumps(fixture, indent=2, allow_nan=False) + "\n", encoding="utf-8"
         )
         print(output)
+
+    phase_cases = []
+    for name, solver_name in (
+        ("rectangular100", "basic"),
+        ("rectangular100", "log-domain"),
+        ("zero_support100", "basic"),
+        ("tiny_reg100", "basic"),
+        ("tiny_reg100", "log-domain"),
+    ):
+        case = next(item for item in CASES if item["name"] == name)
+        phase_cases.append(run_observed_case(case, solver_name))
+    phase_fixture = {"provenance": provenance, "cases": phase_cases}
+    phase_output = fixture_directory / "phase-traces.json"
+    phase_output.write_text(
+        json.dumps(phase_fixture, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(phase_output)
 
 
 if __name__ == "__main__":

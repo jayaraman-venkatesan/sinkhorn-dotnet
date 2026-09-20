@@ -6,8 +6,10 @@ internal static class BasicSolver
         TransportProblem problem,
         double regularization,
         SolverOptions options,
+        ITraceObserver? observer,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         int sourceCount = problem.Source.Length;
         int targetCount = problem.Target.Length;
         var kernel = new double[sourceCount, targetCount];
@@ -37,6 +39,13 @@ internal static class BasicSolver
         int attemptedPairs = 0;
         int acceptedPairs = 0;
 
+        Observe(
+            observer,
+            -1,
+            TracePhase.Initial,
+            sourceScaling,
+            targetScaling);
+
         for (int index = 0; index < options.MaxIterations; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -56,6 +65,13 @@ internal static class BasicSolver
                 targetScaling[j] = problem.Target[j] / denominators[j];
             }
 
+            Observe(
+                observer,
+                index,
+                TracePhase.AfterDestination,
+                sourceScaling,
+                targetScaling);
+
             for (int i = 0; i < sourceCount; i++)
             {
                 double sum = 0.0;
@@ -67,10 +83,23 @@ internal static class BasicSolver
                 sourceScaling[i] = 1.0 / sum;
             }
 
+            Observe(
+                observer,
+                index,
+                TracePhase.AfterSource,
+                sourceScaling,
+                targetScaling);
+
             if (HasNumericalBreakdown(denominators, sourceScaling, targetScaling))
             {
                 Array.Copy(previousSourceScaling, sourceScaling, sourceCount);
                 Array.Copy(previousTargetScaling, targetScaling, targetCount);
+                Observe(
+                    observer,
+                    index,
+                    TracePhase.Restored,
+                    sourceScaling,
+                    targetScaling);
                 termination = TerminationReason.NumericalBreakdown;
                 break;
             }
@@ -116,6 +145,23 @@ internal static class BasicSolver
             checks,
             transportCost,
             warnings);
+    }
+
+    private static void Observe(
+        ITraceObserver? observer,
+        int index,
+        TracePhase phase,
+        double[] sourceScaling,
+        double[] targetScaling)
+    {
+        observer?.Observe(
+            new TraceFrame(
+                index,
+                phase,
+                SolverKind.Basic,
+                (double[])sourceScaling.Clone(),
+                (double[])targetScaling.Clone(),
+                false));
     }
 
     private static double[] InitializeScaling(int count, double[]? logScaling)
