@@ -44,6 +44,88 @@ public sealed class CancellationTests
         Assert.True(observer.SawCompletedFirstPair);
     }
 
+    [Theory]
+    [InlineData(SolverKind.Basic)]
+    [InlineData(SolverKind.LogDomain)]
+    public void CancellationOnConvergingPairThrowsInsteadOfReturningThresholdMet(
+        SolverKind solver)
+    {
+        using var source = new CancellationTokenSource();
+        var observer = new CancelAtPhase(
+            source,
+            0,
+            TracePhase.AfterSource);
+        var problem = new TransportProblem(
+            [0.5, 0.5],
+            [0.5, 0.5],
+            new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
+
+        OperationCanceledException exception = Assert.Throws<OperationCanceledException>(
+            () => SinkhornSolver.Solve(
+                problem,
+                1.0,
+                solver,
+                observer: observer,
+                cancellationToken: source.Token));
+
+        Assert.Equal(source.Token, exception.CancellationToken);
+        Assert.True(observer.Cancelled);
+    }
+
+    [Theory]
+    [InlineData(SolverKind.Basic)]
+    [InlineData(SolverKind.LogDomain)]
+    public void CancellationOnLastBudgetedPairThrowsInsteadOfReturningIterationLimit(
+        SolverKind solver)
+    {
+        using var source = new CancellationTokenSource();
+        var observer = new CancelAtPhase(
+            source,
+            0,
+            TracePhase.AfterSource);
+
+        OperationCanceledException exception = Assert.Throws<OperationCanceledException>(
+            () => SinkhornSolver.Solve(
+                RectangularProblem(),
+                0.3,
+                solver,
+                new SolverOptions(MaxIterations: 1, Threshold: double.Epsilon),
+                observer,
+                source.Token));
+
+        Assert.Equal(source.Token, exception.CancellationToken);
+        Assert.True(observer.Cancelled);
+    }
+
+    [Theory]
+    [InlineData(TracePhase.AfterSource)]
+    [InlineData(TracePhase.Restored)]
+    public void CancellationOnBasicRestoringPairThrowsInsteadOfReturningBreakdown(
+        TracePhase cancellationPhase)
+    {
+        using var source = new CancellationTokenSource();
+        var observer = new CancelAtPhase(
+            source,
+            0,
+            cancellationPhase);
+        var problem = new TransportProblem(
+            [1.0, 0.0],
+            [0.0, 1.0],
+            new double[,] { { 0.0, 1.0 }, { 1.0, 0.0 } });
+
+        OperationCanceledException exception = Assert.Throws<OperationCanceledException>(
+            () => SinkhornSolver.Solve(
+                problem,
+                1.0,
+                SolverKind.Basic,
+                observer: observer,
+                cancellationToken: source.Token));
+
+        Assert.Equal(source.Token, exception.CancellationToken);
+        Assert.True(observer.Cancelled);
+        Assert.True(observer.SawRestoration);
+    }
+
     private static TransportProblem RectangularProblem() => new(
         [20.0, 30.0, 50.0],
         [40.0, 60.0],
@@ -68,5 +150,29 @@ public sealed class CancellationTests
         public int Calls { get; private set; }
 
         public void Observe(TraceFrame frame) => Calls++;
+    }
+
+    private sealed class CancelAtPhase(
+        CancellationTokenSource source,
+        int index,
+        TracePhase phase) : ITraceObserver
+    {
+        public bool Cancelled { get; private set; }
+
+        public bool SawRestoration { get; private set; }
+
+        public void Observe(TraceFrame frame)
+        {
+            if (frame.Phase == TracePhase.Restored)
+            {
+                SawRestoration = true;
+            }
+
+            if (frame.Index == index && frame.Phase == phase)
+            {
+                Cancelled = true;
+                source.Cancel();
+            }
+        }
     }
 }

@@ -100,10 +100,12 @@ internal static class BasicSolver
                     TracePhase.Restored,
                     sourceScaling,
                     targetScaling);
+                cancellationToken.ThrowIfCancellationRequested();
                 termination = TerminationReason.NumericalBreakdown;
                 break;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             acceptedPairs++;
             if (index % 10 == 0)
             {

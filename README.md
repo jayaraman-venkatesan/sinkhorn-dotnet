@@ -101,9 +101,11 @@ than expecting old immutable snapshots to change.
 
 Observer exceptions are caller exceptions and propagate from `Solve`; they are
 not converted to numerical termination results. Cancellation is checked before
-work starts and before every update pair. A requested cancellation throws
-`OperationCanceledException`, including cancellation requested by an observer
-between pairs, and is never reported as `ThresholdMet` or as a completed result.
+work starts, before every update pair, and after every completed pair before
+termination or finalization. Basic performs and reports a required restoration
+before that completed-pair check. A requested cancellation throws
+`OperationCanceledException`, including cancellation requested by an observer,
+and is never reported as `ThresholdMet` or as a completed result.
 
 ## Development
 

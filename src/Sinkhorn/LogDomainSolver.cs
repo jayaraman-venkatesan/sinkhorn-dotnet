@@ -83,6 +83,7 @@ internal static class LogDomainSolver
                 sourceLogScaling,
                 targetLogScaling);
 
+            cancellationToken.ThrowIfCancellationRequested();
             if (index % 10 == 0)
             {
                 double targetL2 = TargetL2(
