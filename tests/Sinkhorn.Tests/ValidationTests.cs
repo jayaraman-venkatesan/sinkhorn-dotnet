@@ -198,6 +198,31 @@ public sealed class ValidationTests
     }
 
     [Fact]
+    public void AppliesMassToleranceAtAdjacentRepresentableBoundaryValues()
+    {
+        const double toleranceFactor = 1e-12;
+        const double sourceTotal = 100.0;
+        double roundedBoundary = sourceTotal / (1.0 - toleranceFactor);
+        double acceptedTarget = Math.BitDecrement(roundedBoundary);
+        double rejectedTarget = Math.BitIncrement(acceptedTarget);
+
+        Assert.Equal(roundedBoundary, rejectedTarget);
+        Assert.True(
+            Math.Abs(sourceTotal - acceptedTarget)
+            <= toleranceFactor * Math.Max(sourceTotal, acceptedTarget));
+        Assert.True(
+            Math.Abs(sourceTotal - rejectedTarget)
+            > toleranceFactor * Math.Max(sourceTotal, rejectedTarget));
+
+        var prepared = Prepare(new([sourceTotal], [acceptedTarget], new double[1, 1]));
+
+        Assert.Equal([sourceTotal], prepared.Source);
+        Assert.Equal([acceptedTarget], prepared.Target);
+        Assert.Throws<ArgumentException>(() =>
+            Prepare(new([sourceTotal], [rejectedTarget], new double[1, 1])));
+    }
+
+    [Fact]
     public void ClonesAllReturnedProblemArrays()
     {
         double[] source = [1.0];
